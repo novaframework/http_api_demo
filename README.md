@@ -8,7 +8,7 @@ We have removed the views directory so we don't have any views.
 
 ## Plugins ##
 
-Plugins is moudles or libraries that you can plug into Nova. They are a behaviour that have a pre and post handler.
+Plugins are modules or libraries that you can plug into Nova. They are a behaviour that have a pre and post handler.
 
 Nova has some plugins in the library:
     - nova_security_plugin: This will handle the security flag that are set in the routing file.
@@ -28,13 +28,13 @@ In routing file plugins also have a priority in what order they will be run, sys
 Here we can see that it will run:
     1. nova_correlation_plugin
     2. nova_cors_plugin
-    4. nova_request_plugin
+    3. nova_request_plugin
 
 In request plugin we also add some options, that we want it to decode the json that we get and send it to controller in the controller_data.
 
 ## Routing file ##
 
-What we want to do with this demo is to create am api that will list pets, add a pet and remove a pet, maybe change a pet.
+What we want to do with this demo is to create an api that will list pets, add a pet and remove a pet, maybe change a pet.
 
 ```erlang
 #{prefix => "",
@@ -48,7 +48,7 @@ What we want to do with this demo is to create am api that will list pets, add a
 }.
 ```
 
-This is the emplated routing file that we did get when we did the `rebar3 new nova http_api_demo`.
+This is the templated routing file that we did get when we did the `rebar3 new nova http_api_demo`.
 
 Now we want to add a pet api that will point to a controller with some functions.
 
@@ -121,7 +121,7 @@ manage_pet(#{req := #{method := <<"POST">>},
     {status, 201, #{}, json:encode(#{<<"id">> => Id, <<"name">> => Name}, [maps, binary])}.
 ```
 
-This is the logic we have in the controller to handle the api request. What it will do is to setup an ets and do simple CRUD.
+This is the logic we have in the controller to handle the api request. What it will do is setup an ets and do simple CRUD.
 
 To test this start a terminal run `rebar3 shell` and in another terminal run `rebar3 ct`.
 
@@ -130,5 +130,5 @@ To test this start a terminal run `rebar3 shell` and in another terminal run `re
 
 ## Database ##
 
-For this demo we willl just use a ets table. Each time the node is started it is a fresh node.
+For this demo we will just use an ets table. Each time the node is started it is a fresh node.
 
