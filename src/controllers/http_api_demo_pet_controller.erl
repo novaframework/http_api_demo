@@ -3,31 +3,31 @@
 
 manage_pet(#{req := #{method := <<"GET">>,
                       bindings := #{petid := PetId}}}) ->
-    case ets:lookup(pets, PetId) of
-        [] ->
+    case http_api_demo_db:get_pet(PetId) of
+        undefined ->
             {status, 404};
-        [{PetId, Name}] ->
-            {status, 200, #{}, json:encode(#{<<"id">> => PetId,
-                                             <<"name">> => Name}, [maps, binary])}
+        {ok, PetMap} ->
+            {json, 200, #{}, PetMap}
     end;
 manage_pet(#{req := #{method := <<"PUT">>,
                       bindings := #{petid := PetId}},
              json := #{<<"name">> := Name}}) ->
-    true = ets:delete(pets, PetId),
-    true = ets:insert(pets, {PetId, Name}),
-    {status, 200, #{}, json:encode(#{<<"id">> => PetId,
-                                     <<"name">> => Name}, [maps, binary])};
+    {ok, _} = http_api_demo_db:update_pet(PetId, Name),
+    {json, 200, #{}, #{<<"id">> => PetId, <<"name">> => Name}};
 manage_pet(#{req := #{method := <<"DELETE">>,
                       bindings := #{petid := PetId}}}) ->
-    true = ets:delete(pets, PetId),
+    ok = http_api_demo_db:delete_pet(PetId),
     {status, 200}; 
 manage_pet(#{req := #{method := <<"GET">>}}) ->
-    List = ets:tab2list(pets),
-    Body = [#{<<"id">> => Id,
-              <<"name">> => Name} ||{Id, Name} <- List],
-    {status, 200, #{}, json:encode(Body, [maps, binary])};
+    case http_api_demo_db:get_pets() of
+        {ok, PetList} ->
+
+            {json, 200, #{}, PetList};
+        _ ->
+            {status, 500}
+    end;
 manage_pet(#{req := #{method := <<"POST">>},
              json := #{<<"name">> := Name}}) ->
-    Id = list_to_binary(uuid:uuid_to_string(uuid:get_v4())),  
-    true = ets:insert(pets, {Id, Name}),
-    {status, 201, #{}, json:encode(#{<<"id">> => Id, <<"name">> => Name}, [maps, binary])}.
+    Id = uuid:uuid_to_string(uuid:get_v4(), binary_standard),
+    http_api_demo_db:create_pet(Id, Name),
+    {json, 201, #{}, #{<<"id">> => Id, <<"name">> => Name}}.

@@ -130,5 +130,36 @@ To test this start a terminal run `rebar3 shell` and in another terminal run `re
 
 ## Database ##
 
-For this demo we will just use an ets table. Each time the node is started it is a fresh node.
+We are using postgres here with the lib PGO.
 
+The config we have to connect to postgres is this in our sys.confgi:
+```erlang
+{pgo, [{pools, [{default, #{pool_size => 10,
+                             host => "localhost",
+                             port => 5555,
+                             database => "http_api_demo",
+                             user => "postgres",
+                             password => "root",
+                             decode_opts => [return_rows_as_maps,column_name_as_atom]}}]}]},
+ {pg_types, [{uuid_format, string},
+             {json_config, {json, [maps, binary], [maps, binary, atom_keys]}}
+            ]},
+ ```
+
+create database:
+```sql
+CREATE DATABASE http_api_demo;
+```
+
+Then we create our table: (This can be find in ./sql/http_api_demo.sql)
+```sql
+CREATE TABLE pet (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR
+)
+```
+
+Then we have collected all queries to the database in http_api_demo_db.erl module.
+
+When a request arrives at the server it will go to Nova, run plugins and later hit the http_api_demo_controller.
+Depending on what method and route it uses it will use different quereis from our database module.
