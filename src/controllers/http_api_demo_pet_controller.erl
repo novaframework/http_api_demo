@@ -5,7 +5,7 @@
          get_pets/1,
          create_pet/1]).
 
-get_pet(#{bindings := #{petid := PetId}}) ->
+get_pet(#{bindings := #{<<"petid">> := PetId}}) ->
     case ets:lookup(pets, PetId) of
         [] ->
             {status, 404};
@@ -14,14 +14,14 @@ get_pet(#{bindings := #{petid := PetId}}) ->
                                <<"name">> => Name}}
     end.
 
-update_pet(#{bindings := #{petid := PetId},
+update_pet(#{bindings := #{<<"petid">> := PetId},
              json := #{<<"name">> := Name}}) ->
     true = ets:delete(pets, PetId),
     true = ets:insert(pets, {PetId, Name}),
     {json, 200, #{}, #{<<"id">> => PetId,
                        <<"name">> => Name}}.
 
-remove_pet(#{bindings := #{petid := PetId}}) ->
+remove_pet(#{bindings := #{<<"petid">> := PetId}}) ->
     true = ets:delete(pets, PetId),
     {status, 200}.
 
