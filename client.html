@@ -17,7 +17,7 @@
                 <h2>GET PETS</h2>
                 <input id='getPetsInput' type='text' disabled='true' placeholder='-- none --'>
                 <button onclick='getPets()'>GET</button>
-                <textarea id='getPetsCB' readonly></textarea>
+                <textarea id='getPetsResponse' readonly></textarea>
             </div>
             <div class='endpoint'>
                 <h2>GET PET</h2>
@@ -27,9 +27,9 @@
             </div>
             <div class='endpoint'>
                 <h2>CREATE PET</h2>
-                <input type='text' placeholder='name'>
+                <input id='createPetInput' type='text' placeholder='name'>
                 <button onclick='createPet()'>POST</button>
-                <textarea readonly></textarea>
+                <textarea id='createPetResponse' readonly></textarea>
             </div>
             <div class='endpoint'>
                 <h2>UPDATE PET</h2>
@@ -208,7 +208,7 @@
     const $ = id => document.getElementById(id)
 
     const getPetsInput = $('getPetsInput')
-    const getPetsCB = $('getPetsCB')
+    const getPetsResponse = $('getPetsResponse')
 
     async function getPets() {
         let res = await fetch('http://localhost:8080/pet')
@@ -216,16 +216,23 @@
         if (res[0] == null) {
             res = "[empty list]"
         }
-        getPetsCB.value = res
+        getPetsResponse.value = res.map(x => x.name)
     }
 
     async function createPet() {
+        const body = {}
+        body['name'] = $('createPetInput').value
+        const response = $('createPetResponse')
+        if (body.name == '') {
+            response.value = 'Please provide a name.'
+            return
+        }
         let res = fetch('http://localhost:8080/pet', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             },
-            body: '{"name": "steve"}'
+            body: JSON.stringify(body)
         }).then(console.log)
     }
 </script>
