@@ -21,9 +21,9 @@
             </div>
             <div class='endpoint'>
                 <h2>GET PET</h2>
-                <input type='text' placeholder='ID'>
-                <button>GET</button>
-                <textarea readonly></textarea>
+                <input id='getPetInput' type='text' placeholder='ID'>
+                <button onclick='getPet()'>GET</button>
+                <textarea id='getPetResponse' readonly></textarea>
             </div>
             <div class='endpoint'>
                 <h2>CREATE PET</h2>
@@ -33,15 +33,15 @@
             </div>
             <div class='endpoint'>
                 <h2>UPDATE PET</h2>
-                <input type='text' placeholder='ID, name'>
-                <button>PUT</button>
-                <textarea readonly></textarea>
+                <input id='updatePetInput' type='text' placeholder='ID, name'>
+                <button onclick='updatePet()'>PUT</button>
+                <textarea id='updatePetResponse' readonly></textarea>
             </div>
             <div class='endpoint'>
                 <h2>DELETE PET</h2>
-                <input type='text' placeholder='ID'>
-                <button>DELETE</button>
-                <textarea readonly></textarea>
+                <input id='deletePetInput' type='text' placeholder='ID'>
+                <button onclick='deletePet()'>DELETE</button>
+                <textarea id='deletePetResponse' readonly></textarea>
             </div>
         </div>
     </div>
@@ -216,24 +216,83 @@
         if (res[0] == null) {
             res = "[empty list]"
         }
-        getPetsResponse.value = res.map(x => x.name)
+        getPetsResponse.value = JSON.stringify(res)
+    }
+
+    async function getPet() {
+        const id = $('getPetInput').value
+        const responseEl = $('getPetResponse')
+        if (id == '') {
+            responseEl.value = 'Please provide an ID.'
+            return
+        }
+        try {
+            let res = await fetch(`http://localhost:8080/pet/${id}`)
+                .then(r => r.json()).then(JSON.stringify)
+            responseEl.value = res
+        } catch (ex) {
+            responseEl.value = 'Not Found, 404'
+        }
     }
 
     async function createPet() {
         const body = {}
         body['name'] = $('createPetInput').value
-        const response = $('createPetResponse')
+        const responseEl = $('createPetResponse')
         if (body.name == '') {
-            response.value = 'Please provide a name.'
+            responseEl.value = 'Please provide a name.'
             return
         }
-        let res = fetch('http://localhost:8080/pet', {
+        let res = await fetch('http://localhost:8080/pet', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             },
             body: JSON.stringify(body)
-        }).then(console.log)
+        }).then(r => r.json()).then(JSON.stringify)
+        responseEl.value = res
+    }
+
+    async function updatePet() {
+        const body = {}
+        const values = $('updatePetInput').value.split(',')
+        const responseEl = $('updatePetResponse')
+        if (values.length != 2) {
+            responseEl.value = 'Please provide an ID and a name name, separated by a comma.'
+            return
+        }
+        const id = values[0]
+        body['name'] = values[1]
+        responseEl.value = ''
+        try {
+            let res = await fetch(`http://localhost:8080/pet/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(body)
+            }).then(r => r.json()).then(JSON.stringify)
+            responseEl.value = res
+        } catch (ex) {
+            responseEl.value = 'Bad Request, 400'
+        }
+    }
+
+    async function deletePet() {
+        const id = $('deletePetInput').value
+        const responseEl = $('deletePetResponse')
+        if (id == '') {
+            responseEl.value = 'Please provide an ID.'
+            return
+        }
+        try {
+            let res = await fetch(`http://localhost:8080/pet/${id}`, {
+                method: 'DELETE',
+            })
+            responseEl.value = `${res.statusText}, ${res.status}`
+        } catch (ex) {
+            responseEl.value = 'Bad Request, 400'
+        }
     }
 </script>
 
