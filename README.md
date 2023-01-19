@@ -102,10 +102,19 @@ Lets replace it with our own methods:
          get_pets/1
         ]).
 
-create_pet(#{json := #{<<"name">> := Name}}) ->
+% Sent  :  { "name": "someName" , 
+%            "weight":33 , 
+%            "owners" : ["dan","andrew" ] }
+% Received :  =>  #{json := #{<<"name">> := <<"someName">> ,
+%                          <<"weight">> :=33 , 
+%                          <<"owners">> := [<<"dan">> , <<"andrew">>]}}
+
+create_pet(#{json := #{<<"name">> := Name , <<"weight">> := Weight, <<"owners">> := Owners }}) ->
     Id = list_to_binary(uuid:uuid_to_string(uuid:get_v4())),  
     true = ets:insert(pets, {Id, Name}),
     {json, 201, #{}, #{<<"id">> => Id, <<"name">> => Name}}.
+
+% Url: /[someUrl]/get_pet/petid/23  =>  #{bindings := #{<<"petid">> := 23}}
 
 get_pet(#{bindings := #{<<"petid">> := PetId}}) ->
     case ets:lookup(pets, PetId) of
@@ -115,6 +124,8 @@ get_pet(#{bindings := #{<<"petid">> := PetId}}) ->
             {json, 200, #{}, #{<<"id">> => PetId,
                                <<"name">> => Name}}
     end.
+
+% Url: [someUrl]/update_pet/petid/23  =>  #{bindings := #{<<"petid">> := 23}}
 
 update_pet(#{bindings := #{<<"petid">> := PetId},
              json := #{<<"name">> := Name}}) ->
@@ -128,6 +139,9 @@ update_pet(#{bindings := #{<<"petid">> := PetId},
             {status, 400}
     end.
 
+
+% Url: [someUrl]/remove_pet/petid/23  =>  #{bindings := #{<<"petid">> := 23}}
+
 remove_pet(#{bindings := #{<<"petid">> := PetId}}) ->
     true = ets:delete(pets, PetId),
     {status, 200}.
@@ -138,6 +152,7 @@ get_pets(_) ->
               <<"name">> => Name} ||{Id, Name} <- List],
     {json, 200, #{}, Body}.
 ```
+For more information regarding input mapping (json , binding....etc) check out this [Page]()
 
 Using the bindings and body of our requests, we now have a fully functioning CRUD API against ETS.
 
