@@ -114,7 +114,9 @@ create_pet(#{json := #{<<"name">> := Name , <<"weight">> := Weight, <<"owners">>
     true = ets:insert(pets, {Id, Name}),
     {json, 201, #{}, #{<<"id">> => Id, <<"name">> => Name}}.
 
-% Url: /[someUrl]/get_pet/petid/23  =>  #{bindings := #{<<"petid">> := 23}}
+
+% When using bindings , all values are of binary type !
+% Url: /[someUrl]/get_pet/petid/23  =>  #{bindings := #{<<"petid">> := <<"23">>}}
 
 get_pet(#{bindings := #{<<"petid">> := PetId}}) ->
     case ets:lookup(pets, PetId) of
@@ -125,7 +127,7 @@ get_pet(#{bindings := #{<<"petid">> := PetId}}) ->
                                <<"name">> => Name}}
     end.
 
-% Url: [someUrl]/update_pet/petid/23  =>  #{bindings := #{<<"petid">> := 23}}
+% Url: [someUrl]/update_pet/petid/23  =>  #{bindings := #{<<"petid">> := <<"23">>}}
 
 update_pet(#{bindings := #{<<"petid">> := PetId},
              json := #{<<"name">> := Name}}) ->
@@ -140,7 +142,7 @@ update_pet(#{bindings := #{<<"petid">> := PetId},
     end.
 
 
-% Url: [someUrl]/remove_pet/petid/23  =>  #{bindings := #{<<"petid">> := 23}}
+% Url: [someUrl]/remove_pet/petid/23  =>  #{bindings := #{<<"petid">> := <<"23">>}}
 
 remove_pet(#{bindings := #{<<"petid">> := PetId}}) ->
     true = ets:delete(pets, PetId),
